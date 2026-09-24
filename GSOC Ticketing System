@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GSOC Security Operations Dashboard</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#0f172a;
+color:white;
+padding:20px;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+}
+
+.header h1{
+font-size:28px;
+color:#38bdf8;
+}
+
+.author{
+color:#94a3b8;
+}
+
+.dashboard{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+gap:15px;
+margin-bottom:20px;
+}
+
+.card{
+background:#1e293b;
+border-radius:10px;
+padding:20px;
+text-align:center;
+box-shadow:0 0 10px rgba(0,0,0,.3);
+}
+
+.card h2{
+font-size:28px;
+margin-top:10px;
+}
+
+.form-section{
+background:#1e293b;
+padding:20px;
+border-radius:10px;
+margin-bottom:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:10px;
+}
+
+input,select,textarea{
+width:100%;
+padding:10px;
+border:none;
+border-radius:5px;
+margin-top:5px;
+}
+
+textarea{
+height:80px;
+}
+
+button{
+padding:10px 20px;
+border:none;
+border-radius:5px;
+cursor:pointer;
+margin-top:10px;
+font-weight:bold;
+}
+
+.btn-primary{
+background:#0284c7;
+color:white;
+}
+
+.btn-danger{
+background:#dc2626;
+color:white;
+}
+
+.btn-success{
+background:#16a34a;
+color:white;
+}
+
+.search{
+margin-bottom:20px;
+}
+
+.ticket-table{
+width:100%;
+border-collapse:collapse;
+background:#1e293b;
+}
+
+.ticket-table th,
+.ticket-table td{
+padding:10px;
+border:1px solid #334155;
+}
+
+.ticket-table th{
+background:#0f172a;
+}
+
+.priority-critical{
+color:#ff4d4d;
+font-weight:bold;
+}
+
+.priority-high{
+color:#ff9933;
+font-weight:bold;
+}
+
+.priority-medium{
+color:#ffd633;
+font-weight:bold;
+}
+
+.priority-low{
+color:#4ade80;
+font-weight:bold;
+}
+
+.status-open{
+color:#f87171;
+}
+
+.status-progress{
+color:#60a5fa;
+}
+
+.status-resolved{
+color:#34d399;
+}
+
+.status-closed{
+color:white;
+}
+
+.footer{
+margin-top:20px;
+text-align:center;
+color:#94a3b8;
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+<div>
+<h1>GSOC Security Operations Dashboard</h1>
+<div class="author">Built by Maddili Nandini</div>
+</div>
+</div>
+
+<div class="dashboard">
+
+<div class="card">
+<div>Total Tickets</div>
+<h2 id="totalTickets">0</h2>
+</div>
+
+<div class="card">
+<div>Open</div>
+<h2 id="openTickets">0</h2>
+</div>
+
+<div class="card">
+<div>In Progress</div>
+<h2 id="progressTickets">0</h2>
+</div>
+
+<div class="card">
+<div>Resolved</div>
+<h2 id="resolvedTickets">0</h2>
+</div>
+
+<div class="card">
+<div>Closed</div>
+<h2 id="closedTickets">0</h2>
+</div>
+
+</div>
+
+<div class="form-section">
+
+<h2>Create New Ticket</h2><br>
+
+<div class="grid">
+
+<div>
+<label>Site</label>
+<input type="text" id="site">
+</div>
+
+<div>
+<label>Location</label>
+<input type="text" id="location">
+</div>
+
+<div>
+<label>Priority</label>
+<select id="priority">
+<option>Critical</option>
+<option>High</option>
+<option>Medium</option>
+<option>Low</option>
+</select>
+</div>
+
+<div>
+<label>Category</label>
+<select id="category">
+<option>Access Control</option>
+<option>Physical Security Incident</option>
+<option>Badge/ID</option>
+<option>Alarm</option>
+<option>Visitor Management</option>
+<option>Guard Operations</option>
+<option>Parking/Perimeter</option>
+<option>CCTV</option>
+</select>
+</div>
+
+<div>
+<label>Status</label>
+<select id="status">
+<option>Open</option>
+<option>In Progress</option>
+<option>Resolved</option>
+<option>Closed</option>
+</select>
+</div>
+
+<div>
+<label>Assigned Team</label>
+<input type="text" id="team">
+</div>
+
+</div>
+
+<br>
+
+<label>Description</label>
+<textarea id="description"></textarea>
+
+<br>
+
+<button class="btn-primary" onclick="createTicket()">
+Create Ticket
+</button>
+
+</div>
+
+<div class="search">
+<input type="text"
+placeholder="Search Ticket..."
+id="searchBox"
+onkeyup="renderTickets()">
+</div>
+
+<table class="ticket-table">
+
+<thead>
+<tr>
+<th>ID</th>
+<th>Date</th>
+<th>Site</th>
+<th>Location</th>
+<th>Priority</th>
+<th>Category</th>
+<th>Status</th>
+<th>Assigned Team</th>
+<th>Action</th>
+</tr>
+</thead>
+
+<tbody id="ticketBody">
+
+</tbody>
+
+</table>
+
+<div class="footer">
+Physical Security eTicketing System | GSOC Dashboard
+</div>
+
+<script>
+
+let tickets=
+JSON.parse(localStorage.getItem("gsocTickets")) || [];
+
+function generateId(){
+return "PS-" + Date.now();
+}
+
+function saveTickets(){
+localStorage.setItem(
+"gsocTickets",
+JSON.stringify(tickets)
+);
+}
+
+function createTicket(){
+
+const ticket={
+id:generateId(),
+date:new Date().toLocaleDateString(),
+site:document.getElementById("site").value,
+location:document.getElementById("location").value,
+priority:document.getElementById("priority").value,
+category:document.getElementById("category").value,
+status:document.getElementById("status").value,
+team:document.getElementById("team").value,
+description:document.getElementById("description").value
+};
+
+tickets.push(ticket);
+
+saveTickets();
+updateDashboard();
+renderTickets();
+
+alert("Ticket Created Successfully");
+
+document.getElementById("site").value="";
+document.getElementById("location").value="";
+document.getElementById("team").value="";
+document.getElementById("description").value="";
+}
+
+function deleteTicket(id){
+
+tickets=tickets.filter(
+t=>t.id!==id
+);
+
+saveTickets();
+renderTickets();
+updateDashboard();
+}
+
+function updateStatus(id){
+
+const ticket=tickets.find(
+x=>x.id===id
+);
+
+const newStatus=
+prompt(
+"Enter Status:\nOpen\nIn Progress\nResolved\nClosed",
+ticket.status
+);
+
+if(newStatus){
+
+ticket.status=newStatus;
+
+saveTickets();
+renderTickets();
+updateDashboard();
+
+}
+
+}
+
+function renderTickets(){
+
+let body=
+document.getElementById(
+"ticketBody"
+);
+
+let search=
+document.getElementById(
+"searchBox"
+).value.toLowerCase();
+
+body.innerHTML="";
+
+tickets
+.filter(t=>
+
+t.id.toLowerCase().includes(search) ||
+t.site.toLowerCase().includes(search) ||
+t.category.toLowerCase().includes(search)
+
+)
+
+.forEach(ticket=>{
+
+body.innerHTML+=`
+
+<tr>
+<td>${ticket.id}</td>
+<td>${ticket.date}</td>
+<td>${ticket.site}</td>
+<td>${ticket.location}</td>
+
+<td class="priority-${ticket.priority.toLowerCase()}">
+${ticket.priority}
+</td>
+
+<td>${ticket.category}</td>
+
+<td>${ticket.status}</td>
+
+<td>${ticket.team}</td>
+
+<td>
+
+<button
+class="btn-success"
+onclick="updateStatus('${ticket.id}')">
+Update
+</button>
+
+<button
+class="btn-danger"
+onclick="deleteTicket('${ticket.id}')">
+Delete
+</button>
+
+</td>
+</tr>
+
+`;
+
+});
+
+}
+
+function updateDashboard(){
+
+document.getElementById(
+"totalTickets"
+).innerText=tickets.length;
+
+document.getElementById(
+"openTickets"
+).innerText=
+tickets.filter(
+t=>t.status==="Open"
+).length;
+
+document.getElementById(
+"progressTickets"
+).innerText=
+tickets.filter(
+t=>t.status==="In Progress"
+).length;
+
+document.getElementById(
+"resolvedTickets"
+).innerText=
+tickets.filter(
+t=>t.status==="Resolved"
+).length;
+
+document.getElementById(
+"closedTickets"
+).innerText=
+tickets.filter(
+t=>t.status==="Closed"
+).length;
+
+}
+
+updateDashboard();
+renderTickets();
+
+</script>
+
+</body>
+</html>
+``
